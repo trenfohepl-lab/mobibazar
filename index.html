@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#050816">
+<title>Certified Pre-Owned Smartphones</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script>
+  tailwind.config = { theme: { extend: { fontFamily: { sans: ['"Plus Jakarta Sans"','system-ui','sans-serif'] } } } }
+</script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<style>
+  html { scroll-behavior: smooth; -webkit-tap-highlight-color: transparent; }
+  body { background:#050816; font-family:'Plus Jakarta Sans',system-ui,sans-serif; }
+  .bg-aurora {
+    background:
+      radial-gradient(55% 35% at 12% 0%, rgba(6,182,212,.18), transparent 60%),
+      radial-gradient(45% 30% at 92% 8%, rgba(16,185,129,.15), transparent 60%),
+      radial-gradient(40% 30% at 50% 100%, rgba(99,102,241,.10), transparent 60%),
+      #050816;
+  }
+  .glass { background:rgba(12,18,38,.62); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); }
+  .no-scrollbar::-webkit-scrollbar{display:none} .no-scrollbar{-ms-overflow-style:none;scrollbar-width:none}
+  .grad-text { background:linear-gradient(90deg,#22d3ee,#34d399); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .pill-active { background:linear-gradient(135deg,#06b6d4,#10b981); color:#021016; border-color:transparent; box-shadow:0 0 22px rgba(6,182,212,.5); }
+  .card { transition:transform .35s cubic-bezier(.2,.8,.2,1), box-shadow .35s, border-color .35s; }
+  .card:hover { transform:translateY(-6px); border-color:rgba(6,182,212,.5); box-shadow:0 22px 60px -14px rgba(6,182,212,.32); }
+  .card .ph { transition:transform .6s cubic-bezier(.2,.8,.2,1); }
+  .card:hover .ph { transform:scale(1.05) translateY(-4px); }
+  .btn-wa { background:linear-gradient(135deg,#22c55e,#10b981 50%,#059669); box-shadow:0 8px 26px -6px rgba(16,185,129,.6); transition:all .25s; }
+  .btn-wa:hover { box-shadow:0 12px 32px -4px rgba(16,185,129,.8); transform:translateY(-1px); }
+  .btn-wa:active { transform:scale(.97); }
+  .pulse-dot::after { content:''; position:absolute; inset:0; border-radius:9999px; background:#10b981; animation:ping 1.6s cubic-bezier(0,0,.2,1) infinite; }
+  @keyframes ping { 75%,100% { transform:scale(2.6); opacity:0; } }
+  .fade-up { animation:fadeUp .6s both cubic-bezier(.2,.8,.2,1); }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:none} }
+  .shine { position:relative; overflow:hidden; }
+  .shine::after { content:''; position:absolute; top:0; left:-120%; width:60%; height:100%; background:linear-gradient(100deg,transparent,rgba(255,255,255,.35),transparent); transform:skewX(-20deg); animation:shine 3.2s infinite; }
+  @keyframes shine { 0%{left:-120%} 60%,100%{left:160%} }
+  #overlay { transition:opacity .3s; }
+  #sheet { transition:transform .4s cubic-bezier(.2,.8,.2,1), opacity .3s; }
+  @media (max-width:767px){ #sheet.closed{ transform:translateY(100%);} }
+  @media (min-width:768px){ #sheet.closed{ transform:scale(.94) translateY(12px); opacity:0;} }
+  details>summary { list-style:none; cursor:pointer; } details>summary::-webkit-details-marker{display:none}
+  details[open] .chev { transform:rotate(180deg); } .chev{ transition:transform .3s; }
+  .toast { transition:all .35s; }
+  select { background-image:none; }
+  .vbadge { animation:vglow 1.8s ease-in-out infinite; }
+  @keyframes vglow { 0%,100%{ box-shadow:0 0 6px rgba(6,182,212,.4);} 50%{ box-shadow:0 0 20px rgba(16,185,129,.95);} }
+</style>
+</head>
+<body class="bg-aurora text-slate-200 antialiased min-h-screen selection:bg-cyan-500/30">
+
+<!-- ANNOUNCEMENT BAR -->
+<div id="offerBar" class="hidden bg-gradient-to-r from-cyan-500 via-emerald-500 to-cyan-500 text-slate-950 text-center text-[12px] sm:text-sm font-bold py-2 px-3">
+  <span id="offerText"></span>
+</div>
+
+<!-- HEADER -->
+<header class="sticky top-0 z-40 glass border-b border-slate-800/80">
+  <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+    <div class="flex items-center gap-3 min-w-0">
+      <div class="w-11 h-11 shrink-0 rounded-2xl bg-gradient-to-br from-cyan-400 to-emerald-500 grid place-items-center shadow-[0_0_26px_rgba(6,182,212,.55)]">
+        <i class="fa-solid fa-mobile-screen-button text-slate-950 text-lg"></i>
+      </div>
+      <div class="min-w-0">
+        <div class="flex items-center gap-1.5 min-w-0">
+          <h1 id="headerStoreName" class="font-extrabold text-white text-[15px] sm:text-lg leading-tight truncate">Store <span class="grad-text">Catalog</span></h1>
+          <span class="shrink-0 inline-flex items-center gap-1 text-[9px] sm:text-[10px] font-bold text-cyan-300 bg-cyan-500/10 border border-cyan-500/30 rounded-full px-1.5 py-0.5"><i class="fa-solid fa-circle-check"></i>VERIFIED</span>
+        </div>
+        <div class="flex items-center gap-2 text-[11px] sm:text-xs text-slate-400">
+          <span class="relative inline-flex w-2 h-2 shrink-0"><span id="openDot" class="pulse-dot relative inline-block w-2 h-2 rounded-full bg-emerald-500"></span></span>
+          <span id="openText" class="font-semibold text-emerald-400">Open Now</span>
+          <span class="text-slate-600">•</span>
+          <span class="truncate"><i class="fa-solid fa-location-dot mr-1 text-slate-500"></i><span id="shortAddr">Main Market</span></span>
+        </div>
+      </div>
+    </div>
+    <div class="flex items-center gap-2 shrink-0">
+      <a id="callBtn" href="#" class="w-10 h-10 sm:w-auto sm:px-4 rounded-xl border border-slate-700 bg-slate-900/70 hover:border-cyan-400 hover:text-cyan-300 grid place-items-center sm:flex sm:gap-2 text-sm font-semibold transition" aria-label="Call store"><i class="fa-solid fa-phone"></i><span class="hidden sm:inline">Call</span></a>
+      <a id="waHeaderBtn" href="#" target="_blank" rel="noopener" class="btn-wa w-10 h-10 sm:w-auto sm:px-4 rounded-xl text-white grid place-items-center sm:flex sm:gap-2 text-sm font-semibold" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp text-lg"></i><span class="hidden sm:inline">WhatsApp</span></a>
+    </div>
+  </div>
+</header>
+
+<main class="max-w-7xl mx-auto px-4 pb-28 md:pb-16">
+
+  <!-- HERO -->
+  <section class="pt-8 sm:pt-12 grid lg:grid-cols-2 gap-6 items-center">
+    <div class="fade-up">
+      <span class="inline-flex items-center gap-2 text-[11px] font-bold tracking-wider uppercase text-cyan-300 bg-cyan-500/10 border border-cyan-500/30 rounded-full px-3 py-1.5">
+        <i class="fa-solid fa-shield-halved"></i> Certified Pre-Owned Phones
+      </span>
+      <h2 class="mt-4 text-[34px] sm:text-6xl font-extrabold text-white leading-[1.05] tracking-tight">
+        Premium Quality.<br><span class="grad-text">Unbeatable Prices.</span>
+      </h2>
+      <p class="mt-4 text-slate-400 max-w-lg text-[15px] leading-relaxed">
+        Every smartphone undergoes a rigorous 32-point inspection. Comes with testing warranty, verified clean IMEI, and complete store invoice. Inspect in-store or reserve instantly on WhatsApp.
+      </p>
+      <div class="mt-6 flex flex-wrap gap-3">
+        <a href="#shop" class="btn-wa shine inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl text-white font-extrabold text-[15px]"><i class="fa-solid fa-bag-shopping"></i> View Available Phones</a>
+        <a id="heroCall" href="#" class="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl border border-slate-700 bg-slate-900/60 hover:border-cyan-400 font-bold text-[15px] transition"><i class="fa-solid fa-phone text-cyan-400"></i> Call Store</a>
+      </div>
+      <div class="mt-8 grid grid-cols-3 gap-3 max-w-md">
+        <div class="glass border border-slate-800/80 rounded-2xl p-3 text-center"><p class="text-xl font-extrabold text-white" id="stCust">5,000+</p><p class="text-[10px] text-slate-500 font-semibold uppercase tracking-wider mt-0.5">Happy Clients</p></div>
+        <div class="glass border border-slate-800/80 rounded-2xl p-3 text-center"><p class="text-xl font-extrabold text-white"><i class="fa-solid fa-star text-amber-400 text-base"></i> <span id="stRating">4.9</span></p><p class="text-[10px] text-slate-500 font-semibold uppercase tracking-wider mt-0.5">Google Rating</p></div>
+        <div class="glass border border-slate-800/80 rounded-2xl p-3 text-center"><p class="text-xl font-extrabold text-white" id="stSince">2020</p><p class="text-[10px] text-slate-500 font-semibold uppercase tracking-wider mt-0.5">Trusted Since</p></div>
+      </div>
+    </div>
+    <div class="relative grid place-items-center min-h-[300px] sm:min-h-[420px] fade-up">
+      <div class="absolute w-72 h-72 sm:w-96 sm:h-96 rounded-full bg-gradient-to-br from-cyan-500/30 to-emerald-500/20 blur-3xl"></div>
+      <div id="heroPhoneContainer" class="relative w-full max-w-[340px] flex justify-center">
+        <div class="glass border border-slate-700/80 rounded-3xl p-6 text-center w-full">
+          <i class="fa-solid fa-mobile-screen text-5xl text-cyan-400 mb-3"></i>
+          <h4 class="text-lg font-bold text-white">Live Stock Updates</h4>
+          <p class="text-xs text-slate-400 mt-1">Real-time availability directly from our store counter.</p>
+          <div class="mt-4 flex items-center justify-center gap-2">
+            <span class="text-xs font-bold text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-full border border-emerald-500/30"><i class="fa-solid fa-check mr-1"></i>100% Tested</span>
+            <span class="text-xs font-bold text-cyan-400 bg-cyan-500/10 px-3 py-1.5 rounded-full border border-cyan-500/30"><i class="fa-solid fa-bolt mr-1"></i>Instant Booking</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TRUST STRIP -->
+  <section class="mt-8 grid grid-cols-2 lg:grid-cols-4 gap-3">
+    <div class="glass border border-slate-800/80 rounded-2xl p-3.5 flex items-start gap-3"><div class="w-10 h-10 shrink-0 rounded-xl bg-cyan-500/10 text-cyan-400 grid place-items-center"><i class="fa-solid fa-microscope"></i></div><div><p class="text-[13px] font-bold text-white leading-tight">32-Point Inspection</p><p class="text-[11px] text-slate-500 mt-0.5">Every feature verified</p></div></div>
+    <div class="glass border border-slate-800/80 rounded-2xl p-3.5 flex items-start gap-3"><div class="w-10 h-10 shrink-0 rounded-xl bg-emerald-500/10 text-emerald-400 grid place-items-center"><i class="fa-solid fa-shield-halved"></i></div><div><p class="text-[13px] font-bold text-white leading-tight">Testing Warranty</p><p class="text-[11px] text-slate-500 mt-0.5">Complete peace of mind</p></div></div>
+    <div class="glass border border-slate-800/80 rounded-2xl p-3.5 flex items-start gap-3"><div class="w-10 h-10 shrink-0 rounded-xl bg-cyan-500/10 text-cyan-400 grid place-items-center"><i class="fa-solid fa-gears"></i></div><div><p class="text-[13px] font-bold text-white leading-tight">100% Genuine Parts</p><p class="text-[11px] text-slate-500 mt-0.5">No counterfeit parts</p></div></div>
+    <div class="glass border border-slate-800/80 rounded-2xl p-3.5 flex items-start gap-3"><div class="w-10 h-10 shrink-0 rounded-xl bg-emerald-500/10 text-emerald-400 grid place-items-center"><i class="fa-solid fa-file-invoice"></i></div><div><p class="text-[13px] font-bold text-white leading-tight">Store Bill & ID Verified</p><p class="text-[11px] text-slate-500 mt-0.5">100% legitimate source</p></div></div>
+  </section>
+
+  <!-- FILTERS -->
+  <section id="shop" class="mt-10 scroll-mt-20 sticky top-[64px] z-30 -mx-4 px-4 py-3 glass border-y border-slate-800/60">
+    <div class="flex gap-2">
+      <div class="relative flex-1">
+        <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"></i>
+        <input id="search" type="search" autocomplete="off" placeholder="Search brand, model, or storage (e.g. iPhone 13, 256GB)..."
+          class="w-full bg-slate-900/80 border border-slate-800 focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/10 outline-none rounded-2xl pl-11 pr-4 py-3.5 text-sm text-white placeholder-slate-500 transition">
+      </div>
+      <div class="relative">
+        <select id="sort" class="appearance-none h-full bg-slate-900/80 border border-slate-800 focus:border-cyan-500 outline-none rounded-2xl pl-3 pr-8 text-xs font-bold text-slate-200 cursor-pointer">
+          <option value="featured">Featured</option>
+          <option value="low">Price: Low → High</option>
+          <option value="high">Price: High → Low</option>
+          <option value="battery">Best Battery</option>
+          <option value="save">Biggest Saving</option>
+        </select>
+        <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-slate-500 pointer-events-none"></i>
+      </div>
+    </div>
+    <div id="brandPills" class="mt-3 flex gap-2 overflow-x-auto no-scrollbar -mx-4 px-4 pb-1"></div>
+    <div id="quickChips" class="mt-2 flex gap-2 overflow-x-auto no-scrollbar -mx-4 px-4 pb-1"></div>
+  </section>
+
+  <!-- GRID -->
+  <section class="mt-6">
+    <div class="flex items-end justify-between mb-4">
+      <h3 class="text-xl font-extrabold text-white">Available Inventory</h3>
+      <p id="resultCount" class="text-xs text-slate-500 font-semibold"></p>
+    </div>
+    <div id="grid" class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"></div>
+    <div id="empty" class="hidden text-center py-16 glass border border-slate-800/80 rounded-3xl">
+      <div class="w-16 h-16 mx-auto rounded-2xl bg-slate-900 grid place-items-center text-slate-500 text-2xl"><i class="fa-solid fa-mobile-retro"></i></div>
+      <p class="mt-4 font-bold text-white">No devices found in this filter</p>
+      <p class="text-sm text-slate-500 mt-1 px-6">Looking for a specific model? Let us know on WhatsApp and we will arrange it for you.</p>
+      <a id="requestBtn" href="#" target="_blank" rel="noopener" class="btn-wa inline-flex items-center gap-2 mt-5 px-5 py-3 rounded-xl text-white text-sm font-bold"><i class="fa-brands fa-whatsapp"></i> Request This Phone</a>
+      <button id="resetBtn" class="block mx-auto mt-3 text-xs text-cyan-400 hover:underline font-semibold">Reset Filters</button>
+    </div>
+  </section>
+
+  <!-- SELL / EXCHANGE -->
+  <section class="mt-14 relative overflow-hidden rounded-3xl border border-cyan-500/30 bg-gradient-to-br from-cyan-500/15 via-slate-900 to-emerald-500/15 p-6 sm:p-10">
+    <div class="absolute -right-10 -top-10 w-56 h-56 rounded-full bg-emerald-500/20 blur-3xl"></div>
+    <div class="relative grid sm:grid-cols-[1fr_auto] gap-6 items-center">
+      <div>
+        <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-300"><i class="fa-solid fa-rotate mr-1"></i>Sell / Exchange</span>
+        <h3 class="mt-2 text-2xl sm:text-3xl font-extrabold text-white leading-tight">Sell or Exchange Your Old Smartphone</h3>
+        <p class="mt-2 text-slate-400 text-sm max-w-lg">Share your phone model and condition on WhatsApp to get the best valuation within minutes. Instant cash or UPI payout.</p>
+      </div>
+      <a id="sellBtn" href="#" target="_blank" rel="noopener" class="btn-wa shine inline-flex items-center justify-center gap-2 px-6 py-4 rounded-2xl text-white font-extrabold"><i class="fa-brands fa-whatsapp text-lg"></i> Get Instant Valuation</a>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="mt-14">
+    <h3 class="text-xl font-extrabold text-white text-center">Simple <span class="grad-text">3-Step Purchase</span></h3>
+    <div class="mt-6 grid sm:grid-cols-3 gap-4">
+      <div class="glass border border-slate-800/80 rounded-3xl p-5 text-center"><div class="w-12 h-12 mx-auto rounded-2xl bg-cyan-500/10 text-cyan-400 grid place-items-center text-lg"><i class="fa-solid fa-hand-pointer"></i></div><p class="mt-3 font-bold text-white">1. Select Your Device</p><p class="text-xs text-slate-500 mt-1">Browse our real-time inventory and view condition reports.</p></div>
+      <div class="glass border border-slate-800/80 rounded-3xl p-5 text-center"><div class="w-12 h-12 mx-auto rounded-2xl bg-emerald-500/10 text-emerald-400 grid place-items-center text-lg"><i class="fa-brands fa-whatsapp"></i></div><p class="mt-3 font-bold text-white">2. Hold on WhatsApp</p><p class="text-xs text-slate-500 mt-1">Tap one button to reserve the phone under your name.</p></div>
+      <div class="glass border border-slate-800/80 rounded-3xl p-5 text-center"><div class="w-12 h-12 mx-auto rounded-2xl bg-cyan-500/10 text-cyan-400 grid place-items-center text-lg"><i class="fa-solid fa-store"></i></div><p class="mt-3 font-bold text-white">3. Visit, Test & Buy</p><p class="text-xs text-slate-500 mt-1">Visit our store counter, test every feature, and take home with bill.</p></div>
+    </div>
+  </section>
+
+  <!-- STORE DETAILS -->
+  <section class="mt-14 glass border border-slate-800/80 rounded-3xl p-6 sm:p-8 grid sm:grid-cols-[1fr_auto] gap-5 items-center">
+    <div>
+      <p class="text-[11px] font-bold uppercase tracking-wider text-cyan-400"><i class="fa-solid fa-location-dot mr-1"></i>Store Location</p>
+      <h3 class="mt-1 text-xl font-extrabold text-white" id="storeName">Our Store</h3>
+      <p class="mt-1 text-sm text-slate-400" id="fullAddr">Address details</p>
+      <p class="mt-1 text-sm text-slate-400"><i class="fa-regular fa-clock mr-1.5 text-emerald-400"></i><span id="hoursText">Open daily</span></p>
+    </div>
+    <a id="mapBtn" href="#" target="_blank" rel="noopener" class="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl border border-cyan-500/50 bg-cyan-500/10 text-cyan-300 font-bold hover:bg-cyan-500/20 transition"><i class="fa-solid fa-diamond-turn-right"></i> Get Directions</a>
+  </section>
+
+  <footer class="mt-12 text-center text-xs text-slate-600 leading-relaxed">
+    <p><span class="text-slate-400 font-bold" id="footName">Store</span> • Certified Smartphone Counter</p>
+    <p class="mt-1">All prices and stock are subject to live store availability.</p>
+  </footer>
+</main>
+
+<!-- MOBILE STICKY BAR -->
+<div class="md:hidden fixed bottom-0 inset-x-0 z-40 glass border-t border-slate-800/80 px-4 pt-3 pb-[max(.75rem,env(safe-area-inset-bottom))] grid grid-cols-5 gap-2">
+  <a id="barCall" href="#" class="col-span-2 py-3 rounded-2xl border border-slate-700 bg-slate-900/70 text-center text-sm font-bold"><i class="fa-solid fa-phone text-cyan-400 mr-1.5"></i>Call Store</a>
+  <a id="barWa" href="#" target="_blank" rel="noopener" class="btn-wa col-span-3 py-3 rounded-2xl text-white text-center text-sm font-extrabold"><i class="fa-brands fa-whatsapp mr-1.5 text-base"></i>WhatsApp Us</a>
+</div>
+
+<!-- MODAL WITH INTERACTIVE IMAGE SLIDER -->
+<div id="modalRoot" class="fixed inset-0 z-50 hidden" role="dialog" aria-modal="true" aria-labelledby="mTitle">
+  <div id="overlay" class="absolute inset-0 bg-black/75 backdrop-blur-sm opacity-0"></div>
+  <div class="absolute inset-0 flex items-end md:items-center justify-center pointer-events-none">
+    <div id="sheet" class="closed relative pointer-events-auto w-full md:max-w-3xl max-h-[92vh] md:max-h-[88vh] overflow-hidden flex flex-col bg-[#070b1c] border border-slate-800 rounded-t-3xl md:rounded-3xl shadow-[0_-20px_80px_-20px_rgba(6,182,212,.4)]">
+      <div class="md:hidden pt-2.5 pb-1 grid place-items-center"><span class="w-11 h-1.5 rounded-full bg-slate-700"></span></div>
+      <button id="closeModal" class="absolute top-3 right-3 z-20 w-9 h-9 rounded-full bg-slate-900/90 border border-slate-800 hover:border-cyan-500 grid place-items-center text-slate-300" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+      <div id="modalBody" class="overflow-y-auto flex-1"></div>
+      <div id="modalFooter" class="p-4 border-t border-slate-800 bg-[#070b1c]/95 pb-[max(1rem,env(safe-area-inset-bottom))]"></div>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast fixed left-1/2 -translate-x-1/2 bottom-24 z-[60] opacity-0 translate-y-4 pointer-events-none glass border border-slate-700 rounded-full px-5 py-3 text-sm font-medium text-white shadow-xl"></div>
+
+<script>
+/* ===== CLOUD CONFIGURATION ===== */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyAUJGlDUuFc0_PiQi4OwLKGq2VevLo3rI0",
+  authDomain: "mobile-shop-bb3ee.firebaseapp.com",
+  databaseURL: "https://mobile-shop-bb3ee-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "mobile-shop-bb3ee",
+  storageBucket: "mobile-shop-bb3ee.firebasestorage.app",
+  messagingSenderId: "234370721702",
+  appId: "1:234370721702:android:8fe98d90e590f8242a9167"
+};
+const STORE_ID = "mobibazar";
+const CLOUDINARY_CLOUD_NAME = "xtzxhfrp";
+const CLOUDINARY_UPLOAD_PRESET = "mobibazar_preset";
+
+firebase.initializeApp(FIREBASE_CONFIG);
+
+/* Store State */
+const STORE = {
+  name: 'Mobibazar Store',
+  whatsapp: '919831182202',
+  phone: '+919831182202',
+  shortAddress: 'Main Counter',
+  address: 'Shop Counter, Main Market',
+  openHour: 10,
+  closeHour: 21,
+  hoursText: 'Open daily: 10:00 AM - 9:00 PM',
+  customers: '5,000+',
+  rating: '4.9',
+  since: '2020',
+  offer: ''
+};
+
+const PHONES = [];
+const BRANDS = ['All'];
+const CAT_IMG = {}, HIDDEN_CATS = new Set();
+const BRAND_ICON = { Apple:'fa-brands fa-apple', Samsung:'fa-solid fa-mobile-screen', All:'fa-solid fa-layer-group' };
+const CHIPS = [
+  { key:'under15', label:'Below ₹15k', icon:'fa-indian-rupee-sign' },
+  { key:'flagship', label:'Flagship Deals', icon:'fa-crown' },
+  { key:'battery85', label:'Battery 85%+', icon:'fa-battery-full' }
+];
+
+const state = { q:'', brand:'All', chips:new Set(), sort:'featured' };
+let openId = null, openSig = '', phonesLoaded = false, rawCats = null;
+let currentSlideIndex = 0, currentPhonePhotos = [];
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const inr = n => '₹' + Number(n||0).toLocaleString('en-IN');
+const saving = p => (p.mrp || p.price) - p.price;
+const specStr = p => `${p.ram}GB / ${p.storage}GB`;
+const waLink = msg => `https://wa.me/${STORE.whatsapp}?text=${encodeURIComponent(msg)}`;
+
+function bookingMessage(p) {
+  return [
+    `Hello ${STORE.name}! 👋`,
+    ``,
+    `I would like to book/reserve this smartphone:`,
+    `📱 *${p.name}* (${p.color || 'Standard'})`,
+    `💾 RAM/Storage: ${specStr(p)}`,
+    `⭐ Condition: ${p.condition} (${p.score || 'Verified'})`,
+    `🔋 Battery Health: ${p.battery}%`,
+    `📦 Included: ${p.box || 'Phone with Accessories'}`,
+    `💰 Price: *${inr(p.price)}* (MRP ${inr(p.mrp)})`,
+    ``,
+    `Please confirm availability and hold this device for me to inspect at your store. Thank you!`
+  ].join('
+');
+}
+
+const notifyMessage = p => `Hello ${STORE.name}! 👋
+
+I was looking at *${p.name}* (${specStr(p)}) which is currently marked Sold Out. Please notify me when a similar phone (around ${inr(p.price)}) becomes available. Thank you!`;
+
+function toast(msg){
+  const t=$('#toast'); t.textContent=msg; t.classList.remove('opacity-0','translate-y-4');
+  clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.add('opacity-0','translate-y-4'),2200);
+}
+
+/* Fallback SVG when no photo exists */
+function phoneSVG(p) {
+  return `
+  <div class="w-full h-full min-h-[180px] flex flex-col items-center justify-center text-slate-600 bg-slate-900/60 rounded-2xl p-4">
+    <i class="fa-solid fa-mobile-screen text-6xl text-cyan-500/40 mb-2"></i>
+    <span class="text-xs font-bold text-slate-400">${esc(p.name)}</span>
+  </div>`;
+}
+
+function phoneVisual(p) {
+  const ph = (p.photos || []).filter(Boolean);
+  return ph.length
+    ? `<img src="${ph[0]}" alt="${esc(p.name)}" loading="lazy" class="mx-auto w-full h-48 object-contain p-2" style="filter:drop-shadow(0 14px 18px rgba(0,0,0,.6))">`
+    : phoneSVG(p);
+}
+
+/* =====================================================
+   HEADER & STORE DETAILS UPDATE (FIXES SHOP NAME DISPLAY)
+   ===================================================== */
+function initStatic() {
+  const nameParts = (STORE.name || 'Mobibazar Store').trim().split(' ');
+  const storeHeader = $('#headerStoreName');
+  if (storeHeader) {
+    if (nameParts.length > 1) {
+      const first = nameParts.slice(0, -1).join(' ');
+      const last = nameParts[nameParts.length - 1];
+      storeHeader.innerHTML = `${esc(first)} <span class="grad-text">${esc(last)}</span>`;
+    } else {
+      storeHeader.innerHTML = `<span class="grad-text">${esc(STORE.name)}</span>`;
+    }
+  }
+
+  document.title = `${STORE.name} — Certified Pre-Owned Smartphones`;
+
+  $('#callBtn').href = $('#heroCall').href = $('#barCall').href = 'tel:' + STORE.phone;
+  const hello = waLink(`Hello ${STORE.name}! I am browsing your certified smartphones catalog.`);
+  $('#waHeaderBtn').href = $('#barWa').href = hello;
+  $('#sellBtn').href = waLink(`Hello ${STORE.name}! I would like to get a quotation to sell/exchange my smartphone.`);
+  
+  $('#shortAddr').textContent = STORE.shortAddress || 'Main Store';
+  $('#fullAddr').textContent = STORE.address || 'Store Address';
+  $('#hoursText').textContent = STORE.hoursText || 'Open Daily';
+  $('#storeName').textContent = STORE.name;
+  $('#footName').textContent = STORE.name;
+  $('#mapBtn').href = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(STORE.name + ' ' + STORE.address);
+  $('#stCust').textContent = STORE.customers || '5,000+';
+  $('#stRating').textContent = STORE.rating || '4.9';
+  $('#stSince').textContent = STORE.since || '2020';
+
+  if (STORE.offer) {
+    $('#offerText').textContent = STORE.offer;
+    $('#offerBar').classList.remove('hidden');
+  } else {
+    $('#offerBar').classList.add('hidden');
+  }
+}
+
+function updateOpenStatus() {
+  const h = new Date().getHours();
+  const open = h >= (STORE.openHour || 10) && h < (STORE.closeHour || 21);
+  const dot = $('#openDot'), txt = $('#openText');
+  txt.textContent = open ? 'Open Now' : 'Closed • Opens at 10 AM';
+  txt.className = 'font-semibold ' + (open ? 'text-emerald-400' : 'text-amber-400');
+  dot.className = (open ? 'pulse-dot ' : '') + 'relative inline-block w-2 h-2 rounded-full ' + (open ? 'bg-emerald-500' : 'bg-amber-500');
+}
+
+/* =====================================================
+   FILTERS
+   ===================================================== */
+function renderPills() {
+  $('#brandPills').innerHTML = BRANDS.map(b => {
+    const a = state.brand === b, ic = CAT_IMG[b] ? `<img src="${CAT_IMG[b]}" alt="" class="inline-block w-5 h-5 rounded-full object-cover mr-1.5 align-middle">` : BRAND_ICON[b] ? `<i class="${BRAND_ICON[b]} mr-1.5"></i>` : '';
+    return `<button data-brand="${b}" class="shrink-0 px-4 py-2 rounded-full border text-[13px] font-bold transition-all duration-300 ${a ? 'pill-active' : 'border-slate-800 bg-slate-900/70 text-slate-300 hover:border-cyan-500/60'}">${ic}${b}</button>`;
+  }).join('');
+}
+
+function renderChips() {
+  $('#quickChips').innerHTML = CHIPS.map(c => {
+    const a = state.chips.has(c.key);
+    return `<button data-chip="${c.key}" class="shrink-0 px-3.5 py-1.5 rounded-full border text-xs font-bold transition-all duration-300 ${a ? 'bg-emerald-500/15 border-emerald-400 text-emerald-300 shadow-[0_0_18px_rgba(16,185,129,.35)]' : 'border-slate-800 bg-slate-900/50 text-slate-400 hover:text-white hover:border-slate-600'}"><i class="fa-solid ${c.icon} mr-1.5 text-[10px]"></i>${c.label}</button>`;
+  }).join('');
+}
+
+$('#brandPills').addEventListener('click', e => { const b = e.target.closest('[data-brand]'); if(!b) return; state.brand = b.dataset.brand; renderPills(); renderGrid(); b.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'}); });
+$('#quickChips').addEventListener('click', e => { const c = e.target.closest('[data-chip]'); if(!c) return; const k=c.dataset.chip; state.chips.has(k)?state.chips.delete(k):state.chips.add(k); renderChips(); renderGrid(); });
+$('#search').addEventListener('input', e => { state.q = e.target.value.trim().toLowerCase(); renderGrid(); });
+$('#sort').addEventListener('change', e => { state.sort = e.target.value; renderGrid(); });
+$('#resetBtn').addEventListener('click', () => { state.q=''; state.brand='All'; state.chips.clear(); state.sort='featured'; $('#search').value=''; $('#sort').value='featured'; renderPills(); renderChips(); renderGrid(); });
+
+function filtered() {
+  let list = PHONES.filter(p => {
+    if (state.brand !== 'All' && p.brand !== state.brand) return false;
+    if (state.chips.has('under15') && p.price >= 15000) return false;
+    if (state.chips.has('flagship') && !p.flagship) return false;
+    if (state.chips.has('battery85') && p.battery < 85) return false;
+    if (state.q) {
+      const hay = `${p.brand} ${p.name} ${p.color || ''} ${p.ram}gb ${p.storage}gb`.toLowerCase();
+      return state.q.split(/\s+/).every(t => hay.includes(t));
+    }
+    return true;
+  });
+  const s = state.sort;
+  if (s === 'low') list.sort((a,b)=>a.price-b.price);
+  else if (s === 'high') list.sort((a,b)=>b.price-a.price);
+  else if (s === 'battery') list.sort((a,b)=>b.battery-a.battery);
+  else if (s === 'save') list.sort((a,b)=>saving(b)-saving(a));
+  else list.sort((a,b)=>(b.stock-a.stock));
+  return list;
+}
+
+/* =====================================================
+   CARDS
+   ===================================================== */
+const condColor = c => c==='Mint' ? 'from-emerald-400 to-cyan-400' : c==='Superb' ? 'from-cyan-400 to-sky-400' : 'from-amber-300 to-yellow-400';
+const batColor = b => b>=90 ? 'text-emerald-300 border-emerald-500/30 bg-emerald-500/10' : b>=85 ? 'text-cyan-300 border-cyan-500/30 bg-cyan-500/10' : 'text-amber-300 border-amber-500/30 bg-amber-500/10';
+
+function cardHTML(p, i) {
+  const sold = !p.stock, pct = Math.round(saving(p)/(p.mrp || p.price)*100);
+  return `
+  <article class="card fade-up glass border border-slate-800/80 rounded-3xl overflow-hidden flex flex-col" style="animation-delay:${i*50}ms">
+    <div class="relative h-60 cursor-pointer overflow-hidden grid place-items-center bg-gradient-to-b from-[#0b1226] to-[#060a17]" data-open="${p.id}">
+      <div class="ph w-full h-full flex items-center justify-center ${sold ? 'grayscale opacity-50' : ''}">${phoneVisual(p)}</div>
+      <span class="absolute top-3 left-3 text-[11px] font-extrabold text-slate-950 bg-gradient-to-r ${condColor(p.condition)} px-2.5 py-1 rounded-full shadow-lg">${p.condition || 'Verified'} ${p.score || ''}</span>
+      ${pct > 0 ? `<span class="absolute top-3 right-3 text-[11px] font-extrabold text-white bg-rose-500/90 px-2.5 py-1 rounded-full shadow-lg">${pct}% OFF</span>` : ''}
+      ${p.video ? `<span class="vbadge absolute top-12 left-3 text-[10px] font-extrabold text-emerald-200 bg-slate-950/75 backdrop-blur border border-emerald-400/60 px-2.5 py-1 rounded-full"><i class="fa-solid fa-play mr-1"></i>20s Video</span>` : ''}
+      ${!sold && p.tag ? `<span class="absolute bottom-3 left-3 text-[10px] font-bold text-cyan-200 bg-slate-950/70 backdrop-blur border border-cyan-500/30 px-2.5 py-1 rounded-full">${p.tag}</span>` : ''}
+      ${!sold && p.left <= 2 ? `<span class="absolute bottom-3 right-3 text-[10px] font-bold text-amber-300 bg-slate-950/70 backdrop-blur border border-amber-500/30 px-2.5 py-1 rounded-full">🔥 Only ${p.left} left</span>` : ''}
+      ${sold ? `<div class="absolute inset-0 grid place-items-center bg-slate-950/60"><span class="rotate-[-8deg] px-5 py-2 rounded-xl border-2 border-red-500/80 text-red-400 font-black tracking-widest text-lg bg-slate-950/90">SOLD OUT</span></div>` : ''}
+    </div>
+    <div class="p-4 flex flex-col flex-1">
+      <p class="text-[11px] uppercase tracking-widest text-slate-500 font-bold">${esc(p.brand)}</p>
+      <h4 class="text-lg font-extrabold text-white leading-tight">${esc(p.name)}</h4>
+      <p class="text-xs text-slate-500 mt-0.5">${esc(p.color || '')} • ${esc(p.age || 'Verified')}</p>
+      <div class="flex flex-wrap gap-1.5 mt-3">
+        <span class="text-[11px] font-bold px-2.5 py-1 rounded-full border border-slate-700 bg-slate-900 text-slate-200"><i class="fa-solid fa-memory mr-1 text-cyan-400"></i>${specStr(p)}</span>
+        <span class="text-[11px] font-bold px-2.5 py-1 rounded-full border ${batColor(p.battery)}">🔋 ${p.battery}% Health</span>
+        <span class="text-[11px] font-bold px-2.5 py-1 rounded-full border border-slate-700 bg-slate-900 text-slate-300 truncate max-w-[150px]">📦 ${esc(p.box || 'Included')}</span>
+      </div>
+      <div class="mt-4 flex items-end justify-between gap-2">
+        <div>
+          <p class="text-[26px] leading-none font-extrabold text-white tracking-tight">${inr(p.price)}</p>
+          ${p.mrp ? `<p class="text-xs text-slate-500 line-through mt-1">MRP ${inr(p.mrp)}</p>` : ''}
+        </div>
+        ${saving(p) > 0 ? `<span class="text-[11px] font-extrabold text-emerald-300 bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-1.5 rounded-lg shadow-[0_0_16px_rgba(16,185,129,.22)]">Save ${inr(saving(p))}</span>` : ''}
+      </div>
+      <div class="grid grid-cols-5 gap-2 mt-4">
+        <button data-open="${p.id}" class="col-span-2 py-3 rounded-xl border border-slate-700 bg-slate-900/70 hover:border-cyan-400 hover:text-cyan-300 text-xs font-bold transition"><i class="fa-solid fa-list-check mr-1"></i>Details</button>
+        ${sold
+          ? `<a href="${waLink(notifyMessage(p))}" target="_blank" rel="noopener" class="col-span-3 py-3 rounded-xl border border-amber-500/40 bg-amber-500/10 text-amber-300 text-xs font-bold text-center hover:bg-amber-500/20 transition"><i class="fa-regular fa-bell mr-1.5"></i>Notify Me</a>`
+          : `<a href="${waLink(bookingMessage(p))}" target="_blank" rel="noopener" class="btn-wa col-span-3 py-3 rounded-xl text-white text-xs font-extrabold text-center"><i class="fa-brands fa-whatsapp mr-1.5 text-sm"></i>Hold on WhatsApp</a>`}
+      </div>
+    </div>
+  </article>`;
+}
+
+function renderGrid() {
+  if (!phonesLoaded) {
+    $('#grid').innerHTML = '<div class="col-span-full text-center py-16 text-slate-500 text-sm"><i class="fa-solid fa-circle-notch fa-spin mr-2"></i>Loading live store inventory…</div>';
+    $('#empty').classList.add('hidden');
+    $('#resultCount').textContent = '';
+    return;
+  }
+  const list = filtered();
+  $('#grid').innerHTML = list.map(cardHTML).join('');
+  $('#empty').classList.toggle('hidden', list.length > 0);
+  $('#resultCount').textContent = `${list.length} item${list.length !== 1 ? 's' : ''}`;
+  if (!list.length) {
+    const q = $('#search').value.trim() || (state.brand !== 'All' ? state.brand : 'smartphone');
+    $('#requestBtn').href = waLink(`Hello ${STORE.name}! I am searching for this model: ${q}. Is it available or can you arrange it?`);
+  }
+}
+
+$('#grid').addEventListener('click', e => {
+  const o = e.target.closest('[data-open]');
+  if (o) openModal(+o.dataset.open);
+});
+
+/* =====================================================
+   MODAL WITH INTERACTIVE SLIDER
+   ===================================================== */
+function diagnostics(p) {
+  const isApple = p.brand?.toLowerCase() === 'apple' || p.os === 'iOS';
+  return [
+    { icon:'fa-camera', label:'Front & Rear Cameras', note:'Optical stabilization, focus and sensor clarity verified' },
+    { icon:'fa-hand-pointer', label:'Display & Touch Response', note:'Zero ghost touch, zero dead pixels, multi-touch responsive' },
+    { icon: isApple ? 'fa-face-smile' : 'fa-fingerprint', label: isApple ? 'Face ID Sensor' : 'Fingerprint & Face Unlock', note:'Registers and unlocks instantly' },
+    { icon:'fa-sun', label: isApple ? 'True Tone & Screen Color' : 'Display Refresh Rate & Calibration', note:'Vibrant, calibrated colors and brightness' },
+    { icon:'fa-signal', label:'5G / 4G / Wi-Fi Connectivity', note:'All network bands, SIM detection and Bluetooth tested' },
+    { icon:'fa-volume-high', label:'Stereo Speakers & Microphone', note:'Clear call audio and high-fidelity speaker output' },
+    { icon:'fa-plug', label:'Charging Port & Physical Keys', note:'Port pins intact, power and volume keys crisp' },
+    { icon:'fa-lock', label:'Device Lock & Account Status', note:'Clean IMEI, zero finance lock, fully unlocked' },
+    { icon:'fa-mobile', label:'Body & Housing Condition', note: p.defectNote || 'Inspected for dents or severe structural marks' }
+  ];
+}
+
+/* Image Slider Navigation */
+function setSlide(index) {
+  if (!currentPhonePhotos.length) return;
+  if (index < 0) index = currentPhonePhotos.length - 1;
+  if (index >= currentPhonePhotos.length) index = 0;
+  currentSlideIndex = index;
+
+  const imgEl = $('#modalSliderImg');
+  const counterEl = $('#modalSlideCounter');
+  if (imgEl) imgEl.src = currentPhonePhotos[currentSlideIndex];
+  if (counterEl) counterEl.textContent = `${currentSlideIndex + 1} / ${currentPhonePhotos.length}`;
+
+  // Update active thumbnail border
+  document.querySelectorAll('.modal-thumb').forEach((th, i) => {
+    th.classList.toggle('border-cyan-400', i === currentSlideIndex);
+    th.classList.toggle('border-slate-800', i !== currentSlideIndex);
+  });
+}
+
+function prevSlide() { setSlide(currentSlideIndex - 1); }
+function nextSlide() { setSlide(currentSlideIndex + 1); }
+
+function modalSliderHTML(p, sold) {
+  const ph = (p.photos || []).filter(Boolean);
+  currentPhonePhotos = ph;
+  currentSlideIndex = 0;
+
+  if (!ph.length) {
+    return `<div class="relative w-full h-72 md:h-full min-h-[320px] flex items-center justify-center bg-slate-900/60 p-6 ${sold ? 'grayscale opacity-50' : ''}">
+      <i class="fa-solid fa-mobile-screen text-7xl text-slate-700"></i>
+    </div>`;
+  }
+
+  const hasMultiple = ph.length > 1;
+
+  return `
+  <div class="relative w-full h-72 md:h-full min-h-[320px] flex flex-col justify-between bg-gradient-to-b from-[#0e1630] to-[#060a17] p-3 select-none ${sold ? 'grayscale opacity-60' : ''}">
+    
+    <!-- Main Image Container -->
+    <div id="sliderTouchArea" class="relative flex-1 flex items-center justify-center overflow-hidden cursor-grab">
+      <img id="modalSliderImg" src="${ph[0]}" alt="${esc(p.name)}" class="max-h-60 md:max-h-72 w-auto object-contain transition-all duration-200" style="filter:drop-shadow(0 16px 20px rgba(0,0,0,.6))">
+      
+      ${hasMultiple ? `
+      <!-- Slider Arrows -->
+      <button onclick="prevSlide()" class="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-slate-950/80 border border-slate-700 text-white grid place-items-center hover:border-cyan-400 transition" aria-label="Previous Photo">
+        <i class="fa-solid fa-chevron-left text-xs"></i>
+      </button>
+      <button onclick="nextSlide()" class="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-slate-950/80 border border-slate-700 text-white grid place-items-center hover:border-cyan-400 transition" aria-label="Next Photo">
+        <i class="fa-solid fa-chevron-right text-xs"></i>
+      </button>
+
+      <!-- Counter Badge -->
+      <span id="modalSlideCounter" class="absolute bottom-2 right-3 text-[11px] font-bold text-slate-300 bg-slate-950/80 border border-slate-800 px-2.5 py-0.5 rounded-full">
+        1 / ${ph.length}
+      </span>
+      ` : ''}
+
+      <span class="absolute bottom-2 left-3 text-[11px] font-extrabold text-slate-950 bg-gradient-to-r ${condColor(p.condition)} px-2.5 py-1 rounded-full shadow-lg">
+        ${p.condition || 'Verified'} ${p.score || ''}
+      </span>
+    </div>
+
+    <!-- Thumbnails Strip -->
+    ${hasMultiple ? `
+    <div class="flex gap-2 justify-center mt-3 pt-2 border-t border-slate-800/80">
+      ${ph.map((s, i) => `
+        <img src="${s}" alt="Thumb ${i+1}" onclick="setSlide(${i})" class="modal-thumb w-10 h-10 rounded-lg object-cover border ${i===0 ? 'border-cyan-400' : 'border-slate-800'} cursor-pointer hover:border-cyan-400 transition">
+      `).join('')}
+    </div>` : ''}
+  </div>`;
+}
+
+function openModal(id, refresh) {
+  const p = PHONES.find(x => x.id === id);
+  if (!p) return;
+  openId = id;
+  openSig = JSON.stringify(p);
+  const keep = refresh ? $('#modalBody').scrollTop : 0;
+  const sold = !p.stock, diag = diagnostics(p);
+
+  $('#modalBody').innerHTML = `
+    <div class="md:grid md:grid-cols-2">
+      ${modalSliderHTML(p, sold)}
+      <div class="p-5">
+        <p class="text-[11px] uppercase tracking-widest text-cyan-400 font-bold">${esc(p.brand)}</p>
+        <h3 id="mTitle" class="text-2xl font-extrabold text-white leading-tight">${esc(p.name)}</h3>
+        <p class="text-xs text-slate-500 mt-1">${esc(p.color || '')} • ${esc(p.age || 'Certified Used')}</p>
+        <div class="flex items-end gap-3 mt-3 flex-wrap">
+          <p class="text-3xl font-extrabold text-white">${inr(p.price)}</p>
+          ${p.mrp ? `<p class="text-sm text-slate-500 line-through pb-1">${inr(p.mrp)}</p>` : ''}
+          ${saving(p) > 0 ? `<span class="text-[11px] font-extrabold text-emerald-300 bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-1 rounded-lg mb-1">Save ${inr(saving(p))}</span>` : ''}
+        </div>
+        <div class="flex flex-wrap gap-1.5 mt-4">
+          <span class="text-[11px] font-bold px-2.5 py-1 rounded-full border border-slate-700 bg-slate-900"><i class="fa-solid fa-memory mr-1 text-cyan-400"></i>${specStr(p)}</span>
+          <span class="text-[11px] font-bold px-2.5 py-1 rounded-full border ${batColor(p.battery)}">🔋 ${p.battery}% Health</span>
+          <span class="text-[11px] font-bold px-2.5 py-1 rounded-full border border-slate-700 bg-slate-900">📦 ${esc(p.box || 'Phone')}</span>
+        </div>
+        <p class="mt-4 text-xs text-slate-300 font-medium"><i class="fa-solid fa-shield-halved text-emerald-400 mr-1.5"></i>Warranty: <span class="text-white">${esc(p.warranty || '7-Day Testing Warranty')}</span></p>
+        ${p.defectNote ? `<p class="mt-2 text-xs text-amber-300/90 font-medium bg-amber-500/10 border border-amber-500/20 p-2 rounded-xl"><i class="fa-solid fa-triangle-exclamation mr-1.5"></i>Condition Note: ${esc(p.defectNote)}</p>` : ''}
+      </div>
+    </div>
+
+    ${p.video ? `
+    <div class="px-5 py-4 border-t border-slate-800">
+      <h4 class="text-sm font-extrabold text-white flex items-center gap-2"><i class="fa-solid fa-circle-play text-cyan-400"></i> 20-Second Live Testing Video <span class="text-[10px] font-semibold text-slate-500">• Actual Device Footage</span></h4>
+      <div class="relative mt-3 mx-auto w-full max-w-[260px] aspect-[9/16] rounded-3xl overflow-hidden border border-cyan-500/30 bg-black shadow-[0_0_30px_-8px_rgba(6,182,212,.5)]">
+        <video id="mVid" src="${p.video}" autoplay loop muted playsinline preload="metadata" class="w-full h-full object-contain"></video>
+        <button onclick="toggleMute()" id="vMute" class="absolute bottom-3 right-3 w-10 h-10 rounded-full bg-slate-950/80 border border-slate-600 text-white grid place-items-center" aria-label="Mute / Unmute"><i class="fa-solid fa-volume-xmark"></i></button>
+      </div>
+    </div>` : ''}
+
+    <div class="px-5 pb-5 pt-3 border-t border-slate-800">
+      <h4 class="text-sm font-extrabold text-white flex items-center gap-2"><i class="fa-solid fa-clipboard-check text-emerald-400"></i> 32-Point Quality Checklist <span class="text-[10px] font-semibold text-slate-500">• In-Store Tested</span></h4>
+      <ul class="mt-3 grid sm:grid-cols-2 gap-2">
+        ${diag.map(d => `
+        <li class="flex items-start gap-3 p-3 rounded-2xl border border-slate-800 bg-slate-900/50">
+          <div class="w-8 h-8 shrink-0 rounded-xl grid place-items-center bg-emerald-500/10 text-emerald-400"><i class="fa-solid ${d.icon} text-xs"></i></div>
+          <div class="min-w-0 flex-1"><p class="text-[13px] font-bold text-white leading-tight">${d.label}</p><p class="text-[11px] text-slate-500 mt-0.5">${d.note}</p></div>
+          <i class="fa-solid fa-circle-check text-emerald-400 mt-1"></i>
+        </li>`).join('')}
+      </ul>
+      <p class="mt-4 text-[11px] text-slate-500 leading-relaxed"><i class="fa-solid fa-circle-info mr-1"></i>Please visit our store counter to inspect and test the phone thoroughly before completing payment. Official invoice provided.</p>
+    </div>`;
+
+  $('#modalFooter').innerHTML = sold
+    ? `<a href="${waLink(notifyMessage(p))}" target="_blank" rel="noopener" class="block w-full text-center py-4 rounded-2xl border border-amber-500/40 bg-amber-500/10 text-amber-300 font-bold hover:bg-amber-500/20 transition"><i class="fa-regular fa-bell mr-2"></i>Sold Out — Notify Me When Available</a>`
+    : `<a href="${waLink(bookingMessage(p))}" target="_blank" rel="noopener" class="btn-wa shine block w-full text-center py-4 rounded-2xl text-white font-extrabold text-[15px]"><i class="fa-brands fa-whatsapp mr-2 text-lg"></i>Reserve on WhatsApp</a>`;
+
+  $('#modalRoot').classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+  $('#modalBody').scrollTop = keep;
+
+  // Setup touch swipe for slider
+  const touchArea = $('#sliderTouchArea');
+  if (touchArea) {
+    let startX = 0;
+    touchArea.addEventListener('touchstart', e => { startX = e.touches[0].clientX; }, {passive:true});
+    touchArea.addEventListener('touchend', e => {
+      const diffX = e.changedTouches[0].clientX - startX;
+      if (diffX > 40) prevSlide();
+      else if (diffX < -40) nextSlide();
+    }, {passive:true});
+  }
+
+  if (refresh) {
+    $('#overlay').classList.remove('opacity-0');
+    $('#sheet').classList.remove('closed');
+  } else {
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      $('#overlay').classList.remove('opacity-0');
+      $('#sheet').classList.remove('closed');
+    }));
+  }
+}
+
+function toggleMute() {
+  const v = $('#mVid'); if (!v) return;
+  v.muted = !v.muted;
+  $('#vMute').innerHTML = `<i class="fa-solid ${v.muted ? 'fa-volume-xmark' : 'fa-volume-high'}"></i>`;
+  if (v.paused) v.play().catch(() => {});
+}
+
+function closeModal() {
+  openId = null;
+  const mv = $('#mVid'); if (mv) mv.pause();
+  $('#overlay').classList.add('opacity-0');
+  $('#sheet').classList.add('closed');
+  setTimeout(() => { $('#modalRoot').classList.add('hidden'); document.body.style.overflow = ''; }, 350);
+}
+
+$('#closeModal').addEventListener('click', closeModal);
+$('#overlay').addEventListener('click', closeModal);
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#modalRoot').classList.contains('hidden')) closeModal(); });
+
+/* =====================================================
+   FIREBASE REAL-TIME SYNC
+   ===================================================== */
+const toArr = v => v ? (Array.isArray(v) ? v.filter(Boolean) : Object.values(v)) : [];
+
+function rebuildBrands() {
+  BRANDS.length = 0; BRANDS.push('All'); HIDDEN_CATS.clear(); Object.keys(CAT_IMG).forEach(k => delete CAT_IMG[k]);
+  (rawCats || []).filter(c => c.name).forEach(c => {
+    if (c.show === false) { HIDDEN_CATS.add(c.name); return; }
+    BRANDS.push(c.name);
+    if (c.img) CAT_IMG[c.name] = c.img;
+  });
+  PHONES.forEach(p => { if (!BRANDS.includes(p.brand) && !HIDDEN_CATS.has(p.brand)) BRANDS.push(p.brand); });
+  if (!BRANDS.includes(state.brand)) state.brand = 'All';
+}
+
+function refreshAll() {
+  initStatic();
+  updateOpenStatus();
+  renderPills();
+  renderChips();
+  renderGrid();
+  if (openId !== null) {
+    const p = PHONES.find(x => x.id === openId);
+    if (!p) closeModal();
+    else if (JSON.stringify(p) !== openSig) openModal(openId, true);
+  }
+}
+
+let _rt;
+const schedule = () => { clearTimeout(_rt); _rt = setTimeout(refreshAll, 60); };
+
+const root = firebase.database().ref(`stores/${STORE_ID}`);
+
+root.child('store').on('value', s => {
+  const v = s.val();
+  if (v) Object.assign(STORE, v);
+  schedule();
+});
+
+root.child('cats').on('value', s => {
+  rawCats = toArr(s.val());
+  rebuildBrands();
+  schedule();
+});
+
+root.child('phones').on('value', s => {
+  PHONES.length = 0;
+  toArr(s.val()).forEach(p => {
+    p.photos = toArr(p.photos);
+    PHONES.push(p);
+  });
+  phonesLoaded = true;
+  rebuildBrands();
+  schedule();
+}, err => {
+  $('#grid').innerHTML = '<div class="col-span-full text-center py-16 text-red-400 text-sm">Failed to connect to store database: ' + esc(err.message) + '</div>';
+});
+
+/* INIT */
+initStatic();
+updateOpenStatus();
+setInterval(updateOpenStatus, 60000);
+renderPills();
+renderChips();
+renderGrid();
+</script>
+</body>
+</html>
